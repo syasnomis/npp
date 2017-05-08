@@ -2,8 +2,16 @@
 
 #include "rom.h"
 
-bool Rom:: bytesCleared() {
+bool Rom::bytesCleared() {
   return !(gameRom[12] || gameRom[13] || gameRom[14] || gameRom[15]);
+}
+
+uint32_t Rom::getPrgRomSize() {
+  return 16384 * programPages;
+}
+
+uint32_t Rom::getChrRomSize() {
+  return 8192 * charPages;
 }
 
 void Rom::loadRom(char* romBuf, std::streampos size) {
@@ -49,5 +57,5 @@ void Rom::parseiNES() {
 }
 
 void Rom::parseArchaic() {
-  header= "Archaic iNES";
+  header = "Archaic iNES";
 }

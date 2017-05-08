@@ -3,10 +3,8 @@
 #include "cpu.h"
 
 Cpu::Cpu() : A(0), X(0), Y(0), S(0xFD), P(0x34), PC(0) {
+  mem.resize(CPU_MEM_SIZE);
   // todo: ensure rom from cart is in mem to ensure correct init of PC
-  
-  // pc reset vector
-  PC = (mem[0xFFFD] << 8) + mem[0xFFFC];
 }
 
 
@@ -27,8 +25,9 @@ void Cpu::fdxCycle() {
       break;
 
     default:
-      std::cout << "UNIMPLEMENTED OPCODE: " << std::hex << opcode << std::endl;
-      std::cout << "PC: " << std::hex << PC;
+      std::cout << "UNIMPLEMENTED OPCODE: " << std::hex << static_cast<uint16_t>(opcode) << std::endl;
+      debugPrint();
+      std::cout << std::flush;
       while(1) {
         // loop forever
       }

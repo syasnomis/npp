@@ -1,5 +1,3 @@
-#include <cstdint>
-
 #define CPU_MEM_SIZE 65536
 
 /**
@@ -21,5 +19,7 @@ struct Cpu {
 
   // fetch, decode, execute cycle
   void fdxCycle();
+
+  void debugPrint();
 
 };

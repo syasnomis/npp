@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
-#include "cpu.h"
+
+#include "nes.h"
 
 using namespace std;
 
@@ -14,20 +15,23 @@ int main(int argc, char* argv[]) {
   ifstream rom;
   rom.open(argv[1], ios::in|ios::binary|ios::ate);
   streampos size;
-  char* memblock;
+  char* gameBuf;
 
   if (rom.is_open()) {
     size = rom.tellg();
-    cout << "Rom size: " << size << endl;
-    memblock = new char[size];
+    gameBuf = new char[size];
     rom.seekg(0, ios::beg);
-    rom.read(memblock, size);
+    rom.read(gameBuf, size);
     rom.close();
-    cout << "rom read into memory" << endl;
-
-    for (int i = 0; i < size; ++i) {
-      //cout << memblock[i];
-    }
+  } else {
+    cout << "Error trying to open rom file." << endl;
+    return 1;
   }
+
+  Nes nes;
+  nes.loadGame(gameBuf, size);
+  delete[] gameBuf;
+  nes.start();
+
   return 0;
 }

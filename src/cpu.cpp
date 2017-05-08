@@ -1,11 +1,8 @@
-#include "cpu.h"
 #include <iostream>
 
-Cpu::Cpu() {
-  P = 0x34; 
-  A = X = Y = 0; 
-  S = 0xFD; 
+#include "cpu.h"
 
+Cpu::Cpu() : A(0), X(0), Y(0), S(0xFD), P(0x34), PC(0) {
   // todo: ensure rom from cart is in mem to ensure correct init of PC
   
   // pc reset vector
@@ -31,9 +28,21 @@ void Cpu::fdxCycle() {
 
     default:
       std::cout << "UNIMPLEMENTED OPCODE: " << std::hex << opcode << std::endl;
-      std::cout << "PC: " << PC;
+      std::cout << "PC: " << std::hex << PC;
       while(1) {
         // loop forever
       }
   }
+}
+
+// Since uint8_t is typedef for char stream interprets it as character to print
+// and not the value itself. Cast to unit16_t to ensure value is printed.
+void Cpu::debugPrint() {
+  std::cout << "CPU DEBUG INFO:" << std::endl;
+  std::cout << "P: " << std::hex << static_cast<uint16_t>(P) << std::endl;
+  std::cout << "X: " << std::hex << static_cast<uint16_t>(X) << std::endl;
+  std::cout << "Y: " << std::hex << static_cast<uint16_t>(Y) << std::endl;
+  std::cout << "A: " << std::hex << static_cast<uint16_t>(A) << std::endl;
+  std::cout << "S: " << std::hex << static_cast<uint16_t>(S) << std::endl;
+  std::cout << "PC: " << std::hex << PC << std::endl;
 }

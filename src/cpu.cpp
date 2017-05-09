@@ -4,7 +4,6 @@
 
 Cpu::Cpu() : A(0), X(0), Y(0), S(0xFD), P(0x34), PC(0), cycles(0) {
   mem.resize(CPU_MEM_SIZE);
-  // todo: ensure rom from cart is in mem to ensure correct init of PC
 }
 
 
@@ -95,8 +94,8 @@ void Cpu::fdxCycle() {
   }
 }
 
-// Since uint8_t is typedef for char stream interprets it as character to print
-// and not the value itself. Cast to unit16_t to ensure value is printed.
+// Since uint8_t is typedef for char stream operator interprets it as ascii 
+// character and not the integer value. Cast to unit16_t to fix this.
 void Cpu::debugPrint() {
   std::cout << "CPU DEBUG INFO:" << std::endl;
   std::cout << "P: " << std::hex << static_cast<uint16_t>(P) << std::endl;

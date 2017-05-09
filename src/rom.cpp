@@ -30,8 +30,8 @@ void Rom::loadRom(char* romBuf, std::streampos size) {
   }
 }
 
-// Since uint8_t is typedef for char stream interprets it as character to print
-// and not the value itself. Cast to unit16_t to ensure value is printed.
+// Since uint8_t is typedef for char stream operator interprets it as ascii 
+// character and not the integer value. Cast to unit16_t to fix this.
 void Rom::debugPrint() {
   std::cout << "ROM DEBUG INFO:" << std::endl;
   std::cout << "Header type: " << header << std::endl;

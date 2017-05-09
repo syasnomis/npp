@@ -1,7 +1,7 @@
 #include <vector>
 
-#define CPU_MEM_SIZE 65536
-#define PRG_ROM_MEM_OFFSET 0x8000
+static const uint32_t CPU_MEM_SIZE = 65536;
+static const uint32_t PRG_ROM_MEM_OFFSET = 0x8000;
 
 /**
  * Data structure emulating NES CPU core (mos 6502)

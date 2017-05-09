@@ -14,19 +14,19 @@ uint32_t Rom::getChrRomSize() {
   return 8192 * charPages;
 }
 
-void Rom::loadRom(char* romBuf, std::streampos size) {
-  gameRom.resize(size);
-  for (int i = 0; i < size; ++i) {
-    gameRom[i] = romBuf[i];
+void Rom::loadRom(char* romBuf, size_t size) {
+  gameRom.resize(size-HEADER_OFFSET);
+  for (size_t i = 0; i < size; ++i) {
+    gameRom[i] = romBuf[HEADER_OFFSET+i];
   }
 
   // parse ROM header
-  if (((gameRom[7] & 0xC) == 0x08) && gameRom[9] <= size) {
-    parseNES2();
-  } else if (((gameRom[7] & 0x0C) == 0x00) && bytesCleared()) {
-    parseiNES();
+  if (((romBuf[7] & 0xC) == 0x08) && romBuf[9] <= size) {
+    parseNES2(romBuf);
+  } else if (((romBuf[7] & 0x0C) == 0x00) && bytesCleared()) {
+    parseiNES(romBuf);
   } else {
-    parseArchaic();
+    parseArchaic(romBuf);
   }
 }
 
@@ -43,19 +43,32 @@ void Rom::debugPrint() {
   std::cout << "Flags 7: " << std::hex << static_cast<uint16_t>(flags7) << std::endl;
 }
 
-void Rom::parseNES2() {
+void Rom::parseNES2(char* romBuf) {
   header = "NES2.0";
+  // todo: implement real NES2 header parsing
+  programPages = romBuf[4];
+  charPages = romBuf[5];
+  flags6 = romBuf[6];
+  flags7 = romBuf[7];
+  mapperNumber = (flags7 & 0xF0) | (flags6 >> 4);
+
 }
 
-void Rom::parseiNES() {
+void Rom::parseiNES(char* romBuf) {
   header = "iNES";
-  programPages = gameRom[4];
-  charPages = gameRom[5];
-  flags6 = gameRom[6];
-  flags7 = gameRom[7];
+  programPages = romBuf[4];
+  charPages = romBuf[5];
+  flags6 = romBuf[6];
+  flags7 = romBuf[7];
   mapperNumber = (flags7 & 0xF0) | (flags6 >> 4);
 }
 
-void Rom::parseArchaic() {
+void Rom::parseArchaic(char* romBuf) {
   header = "Archaic iNES";
+  // todo:: implement res archaic header parsing
+  programPages = romBuf[4];
+  charPages = romBuf[5];
+  flags6 = romBuf[6];
+  flags7 = romBuf[7];
+  mapperNumber = (flags7 & 0xF0) | (flags6 >> 4);
 }

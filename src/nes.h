@@ -5,7 +5,7 @@
 
 class Nes {
   public:
-    void loadGame(char *romBuf, std::streampos size);
+    void loadGame(char *romBuf, size_t size);
     void start();
 
   private:

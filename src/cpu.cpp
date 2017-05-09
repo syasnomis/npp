@@ -98,12 +98,13 @@ void Cpu::fdxCycle() {
 // character and not the integer value. Cast to unit16_t to fix this.
 void Cpu::debugPrint() {
   std::cout << "CPU DEBUG INFO:" << std::endl;
-  std::cout << "P: " << std::hex << static_cast<uint16_t>(P) << std::endl;
-  std::cout << "X: " << std::hex << static_cast<uint16_t>(X) << std::endl;
-  std::cout << "Y: " << std::hex << static_cast<uint16_t>(Y) << std::endl;
-  std::cout << "A: " << std::hex << static_cast<uint16_t>(A) << std::endl;
-  std::cout << "S: " << std::hex << static_cast<uint16_t>(S) << std::endl;
-  std::cout << "PC: " << std::hex << PC << std::endl;
+  std::cout << "A:" << std::hex << static_cast<uint16_t>(A) << " ";
+  std::cout << "X:" << std::hex << static_cast<uint16_t>(X) << " ";
+  std::cout << "Y:" << std::hex << static_cast<uint16_t>(Y) << " ";
+  std::cout << "P:" << std::hex << static_cast<uint16_t>(P) << " ";
+  std::cout << "S:" << std::hex << static_cast<uint16_t>(S) << " ";
+  std::cout << "CYC:" << std::hex << cycles << " ";
+  std::cout << "PC:" << std::hex << PC << std::endl;
 }
 
 void Cpu::setNegative(uint8_t operand) {

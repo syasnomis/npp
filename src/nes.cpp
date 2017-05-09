@@ -22,7 +22,9 @@ void Nes::debugPrint() {
 }
 
 void Nes::start() {
-  debugPrint();
-  cpu.fdxCycle();
+  while (1) {
+    debugPrint();
+    cpu.fdxCycle();
+  }
 }
 

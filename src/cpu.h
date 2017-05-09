@@ -16,6 +16,7 @@
 struct Cpu {
   uint8_t A, X, Y, S, P; 
   uint16_t PC; 
+  uint16_t cycles;
   std::vector<uint8_t> mem;
 
   Cpu();
@@ -24,5 +25,9 @@ struct Cpu {
   void fdxCycle();
 
   void debugPrint();
+
+  private:
+    void setNegative(uint8_t operand); // set bit 7 of P iff operand < 0
+    void setZero(uint8_t operand); // set bit 1 of P iff operand == 0
 
 };

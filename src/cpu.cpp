@@ -2,7 +2,7 @@
 
 #include "cpu.h"
 
-Cpu::Cpu() : A(0), X(0), Y(0), S(0xFD), P(0x34), PC(0) {
+Cpu::Cpu() : A(0), X(0), Y(0), S(0xFD), P(0x34), PC(0), cycles(0) {
   mem.resize(CPU_MEM_SIZE);
   // todo: ensure rom from cart is in mem to ensure correct init of PC
 }
@@ -10,6 +10,7 @@ Cpu::Cpu() : A(0), X(0), Y(0), S(0xFD), P(0x34), PC(0) {
 
 void Cpu::fdxCycle() {
   uint8_t opcode = mem[PC];
+  std::cout << "EXECUTING OPCODE: " << std::hex << static_cast<uint16_t>(opcode) << std::endl << std::endl;
   switch (opcode) {
 
     // ADC Immediate
@@ -22,6 +23,66 @@ void Cpu::fdxCycle() {
         A = A+C+nn;
       }
       PC += 2;
+      // todo: add cycles
+      break;
+
+    // SEI (Set Interrupt Disable Flag, bit 2 of P)
+    case 0x78:
+      P |= 0x04;
+      PC += 1;
+      cycles += 2;
+      break;
+
+    // STA (Store Accumulator, Absolute addressing mode)
+    case 0x8D:
+      {
+        auto operand = (mem[PC+2] << 8) | mem[PC+1];
+        mem[operand] = A;
+      }
+      PC += 3;
+      cycles += 4;
+      break;
+
+    // LDX (Load X, Immediate addressing mode)
+    case 0xA2:
+      {
+        auto immediate = mem[PC+1];
+        X = immediate;
+        setNegative(immediate);
+        setZero(immediate);
+      }
+      PC += 2;
+      cycles += 2;
+
+    // CLD (Clear Decimal Flag, bit 3 of P)
+    case 0xD8:
+      P &= ~(0x01 << 3);
+      PC += 1;
+      cycles += 2;
+      break;
+
+    // LDA (Load Accumulator, Immediate addressing mode)
+    case 0xA9:
+      {
+        auto immediate = mem[PC+1];
+        A = immediate;
+        setNegative(immediate);
+        setZero(immediate);
+      }
+      PC += 2;
+      cycles += 2;
+      break;
+
+    // LDA (Load Accumulator, Absolute addressing mode)
+    case 0xAD:
+      {
+        auto operand = (mem[PC+2] << 8) | mem[PC+1];
+        A = operand;
+        setNegative(operand);
+        setZero(operand);
+      }
+      PC += 3;
+      cycles += 4;
       break;
 
     default:
@@ -44,4 +105,20 @@ void Cpu::debugPrint() {
   std::cout << "A: " << std::hex << static_cast<uint16_t>(A) << std::endl;
   std::cout << "S: " << std::hex << static_cast<uint16_t>(S) << std::endl;
   std::cout << "PC: " << std::hex << PC << std::endl;
+}
+
+void Cpu::setNegative(uint8_t operand) {
+  if (operand <= 0x7F) {
+    P &= ~(1 << 0x07);
+  } else {
+    P |= (1 << 0x07);
+  }
+}
+
+void Cpu::setZero(uint8_t operand) {
+  if (!operand) {
+    P |= 0x02;
+  } else {
+    P &= ~(0x02);
+  }
 }

@@ -1,2 +1,4 @@
 roms/*
 *.out
+*.o
+npp

@@ -2,21 +2,20 @@
 
 #include "cpu.h"
 
-Cpu::Cpu() : A(0), X(0), Y(0), P(0x34), S(0x01FD), PC(0), cycles(0) {
-  mem.resize(CPU_MEM_SIZE);
-}
+Cpu::Cpu() : A(0), X(0), Y(0), P(0x34), S(0x01FD), PC(0), cycles(0), ram(RAM_SIZE) {}
 
 
 void Cpu::fdxCycle() {
-  uint8_t opcode = mem[PC];
+  uint8_t opcode = read_byte(PC);
   std::cout << "EXECUTING OPCODE: " << std::hex << static_cast<uint16_t>(opcode) << std::endl << std::endl;
   switch (opcode) {
 
     // JSR (Jump to subroutine)
     case 0x20:
       {
-        auto operand = (mem[PC+2] << 8) | mem[PC+1];
-        mem[S--] = PC+2;
+        auto operand = read_byte2(PC+1);
+        write_byte(S, PC+2);
+        S -= 1;
         PC = operand;
       }
       cycles += 6;
@@ -32,7 +31,7 @@ void Cpu::fdxCycle() {
     // JMP Absolute
     case 0x4C:
       {
-        auto operand = (mem[PC+2] << 8) | mem[PC+1];
+        auto operand = read_byte2(PC+1);
         PC = operand;
       }
       cycles += 3;
@@ -42,7 +41,7 @@ void Cpu::fdxCycle() {
     case 0x69:
       {
         auto C = P & 0x1;
-        auto nn = mem[PC+1];
+        auto nn = read_byte(PC+1);
         P &= 0xFE;
         P |= (((A+C+nn) & 0x100) >> 8);
         A = A+C+nn;
@@ -61,8 +60,8 @@ void Cpu::fdxCycle() {
     // STX (Store X, Zero page)
     case 0x86:
       {
-        auto operand = mem[PC+1];
-        mem[operand] = X;
+        auto operand = read_byte(PC+1);
+        write_byte(operand, X);
       }
       PC += 2;
       cycles += 3;
@@ -71,8 +70,8 @@ void Cpu::fdxCycle() {
     // STA (Store Accumulator, Absolute addressing mode)
     case 0x8D:
       {
-        auto operand = (mem[PC+2] << 8) | mem[PC+1];
-        mem[operand] = A;
+        auto operand = read_byte2(PC+1);
+        write_byte(operand, A);
       }
       PC += 3;
       cycles += 4;
@@ -81,7 +80,7 @@ void Cpu::fdxCycle() {
     // LDX (Load X, Immediate addressing mode)
     case 0xA2:
       {
-        auto immediate = mem[PC+1];
+        auto immediate = read_byte(PC+1);
         X = immediate;
         setNegative(immediate);
         setZero(immediate);
@@ -93,7 +92,7 @@ void Cpu::fdxCycle() {
     // LDA (Load Accumulator, Immediate addressing mode)
     case 0xA9:
       {
-        auto immediate = mem[PC+1];
+        auto immediate = read_byte(PC+1);
         A = immediate;
         setNegative(immediate);
         setZero(immediate);
@@ -105,7 +104,7 @@ void Cpu::fdxCycle() {
     // LDA (Load Accumulator, Absolute addressing mode)
     case 0xAD:
       {
-        auto operand = (mem[PC+2] << 8) | mem[PC+1];
+        auto operand = read_byte2(PC+1);
         A = operand;
         setNegative(operand);
         setZero(operand);
@@ -149,6 +148,60 @@ void Cpu::debugPrint() {
   std::cout << "CYC:" << std::dec << cycles << " ";
   std::cout << "PC:" << std::hex << PC << std::endl;
 }
+
+void Cpu::init(const Rom& rom) {
+  // todo: init segments of cpu other than banks
+  
+  // todo: implement initialization for MMC other than NROM
+  prgRomBank1 = &rom.rom[0];
+  prgRomBank2 = &rom.rom[0];
+
+  //PC = read_byte2(0xFFFC);
+  // hardcode PC for cpu nestest
+  PC = 0xC000;
+}
+
+
+uint8_t Cpu::read_byte(uint16_t loc) {
+  uint8_t byte;
+  if (loc < 0x2000) {
+    byte = ram[loc%RAM_SIZE];
+  } else if (loc < 0x4000) {
+    byte = ppuRegisters;
+  } else if (loc < 0x4020) {
+    byte = registers[loc%NUM_REGISTERS];
+  } else if (loc < 0x6000) {
+    byte = expansionRom[loc%EXPANSION_ROM_SIZE];
+  } else if (loc < 0x8000) {
+    byte = sram[loc%SRAM_SIZE];
+  } else if (loc < 0xC000) {
+    byte = prgRomBank1[loc%PRG_ROM_BANK_SIZE];
+  } else {
+    byte = prgRomBank2[loc%PRG_ROM_BANK_SIZE];
+  }
+  return byte;
+}
+
+uint16_t Cpu::read_byte2(uint16_t loc) {
+  return (read_byte(loc+1) << 8) | read_byte(loc);
+}
+
+void Cpu::write_byte(uint16_t loc, uint8_t byte) {
+  if (loc < 0x2000) {
+    ram[loc%RAM_SIZE] = byte;
+  } else if (loc < 0x4000) {
+    ppuRegisters = byte;
+  } else if (loc < 0x4020) {
+    registers[loc%NUM_REGISTERS] = byte;
+  } else if (loc > 0x5FFF && loc < 0x8000) {
+    sram[loc%SRAM_SIZE] = byte;
+  } else {
+    std::cout << "WRITE TO ILLEGAL ADDRESS: " << std::hex << loc << std::endl;
+    debugPrint();
+    while(1) {}
+  }
+}
+
 
 void Cpu::setNegative(uint8_t operand) {
   if (operand <= 0x7F) {

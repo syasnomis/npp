@@ -28,8 +28,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  Nes nes;
-  nes.loadGame(gameBuf, size);
+  Nes nes(gameBuf, size);
   delete[] gameBuf;
   nes.start();
 

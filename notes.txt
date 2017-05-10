@@ -1,0 +1,11 @@
+Place to put todo work and general thoughts:
+
+1) Refactor memory to be split into sections based of memory map. This will
+   allow for pointer manipulation during bank switching and make mirroring
+   easier.
+
+2) nestest log at http://www.qmtpro.com/~nes/misc/nestest.log seems to multiply
+   their cycle count by 3 relative to mine. I think there is going to be some
+   component that runs at a lower frequency, 1/3 to be exact, of the CPU (PPU
+   maybe?). In this case multiplying by 3 would let us work with whole numbers
+   in cycle counting.

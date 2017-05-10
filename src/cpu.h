@@ -14,8 +14,8 @@ static const uint32_t PRG_ROM_MEM_OFFSET = 0x8000;
  */
 
 struct Cpu {
-  uint8_t A, X, Y, S, P; 
-  uint16_t PC; 
+  uint8_t A, X, Y, P; 
+  uint16_t S, PC; 
   uint16_t cycles;
   std::vector<uint8_t> mem;
 

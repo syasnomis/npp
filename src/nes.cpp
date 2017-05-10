@@ -13,9 +13,9 @@ void Nes::loadGame(char* romBuf, size_t size) {
   }
 
   // pc reset vector
-  cpu.PC = (cpu.mem[0xFFFD] << 8) + cpu.mem[0xFFFC];
+  //cpu.PC = (cpu.mem[0xFFFD] << 8) + cpu.mem[0xFFFC];
   // harcoded reset vector for nestest rom automatic mode
-  // cpu.PC = 0xC000;
+  cpu.PC = 0xC000;
 }
 
 void Nes::debugPrint() {

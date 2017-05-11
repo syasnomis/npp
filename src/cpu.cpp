@@ -10,6 +10,13 @@ void Cpu::fdxCycle() {
   std::cout << "EXECUTING OPCODE: " << std::hex << static_cast<uint16_t>(opcode) << std::endl << std::endl;
   switch (opcode) {
 
+    // Clear carry flag
+    case 0x18:
+      P &= ~(0x01);
+      PC += 1;
+      cycles += 2;
+      break;
+
     // JSR (Jump to subroutine)
     case 0x20:
       {
@@ -77,6 +84,27 @@ void Cpu::fdxCycle() {
       cycles += 4;
       break;
 
+    // BCC - Branch if carry clear
+    case 0x90:
+      if (!(P & 0x01)) {
+        PC += read_byte(PC+1);
+      }
+      PC += 2;
+      cycles += 2;
+      break;
+
+    // LDY (Load Y, Immediate addressing mode)
+    case 0xA0:
+      {
+        auto immediate = read_byte(PC+1);
+        Y = immediate;
+        setNegative(immediate);
+        setZero(immediate);
+      }
+      PC += 2;
+      cycles += 2;
+      break;
+
     // LDX (Load X, Immediate addressing mode)
     case 0xA2:
       {
@@ -87,6 +115,18 @@ void Cpu::fdxCycle() {
       }
       PC += 2;
       cycles += 2;
+      break;
+
+    // LDA (Load Accumulator, Zero page)
+    case 0xA5:
+      {
+        auto val = read_byte(read_byte(PC+1));
+        A = val;
+        setNegative(val);
+        setZero(val);
+      }
+      PC += 2;
+      cycles += 3;
       break;
 
     // LDA (Load Accumulator, Immediate addressing mode)
@@ -111,6 +151,15 @@ void Cpu::fdxCycle() {
       }
       PC += 3;
       cycles += 4;
+      break;
+
+    // BCS - Branch if carry set
+    case 0xB0:
+      if (P & 0x01) {
+        PC += read_byte(PC+1);
+      }
+      PC += 2;
+      cycles += 2;
       break;
 
     // CLD (Clear Decimal Flag, bit 3 of P)
@@ -152,13 +201,14 @@ void Cpu::debugPrint() {
 void Cpu::init(const Rom& rom) {
   // todo: init segments of cpu other than banks
   
-  // todo: implement initialization for MMC other than NROM
+  // todo: implement initialization for MMCs properly, right now we are
+  // assuming we have two banks as in mario bros.
   prgRomBank1 = &rom.rom[0];
-  prgRomBank2 = &rom.rom[0];
+  prgRomBank2 = &rom.rom[1];
 
-  //PC = read_byte2(0xFFFC);
+  PC = read_byte2(0xFFFC);
   // hardcode PC for cpu nestest
-  PC = 0xC000;
+  //PC = 0xC000;
 }
 
 

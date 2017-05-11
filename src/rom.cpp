@@ -32,7 +32,7 @@ Rom::Rom(char* romBuf, size_t size) {
 void Rom::debugPrint() {
   std::cout << "ROM DEBUG INFO:" << std::endl;
   std::cout << "Header type: " << headerType << std::endl;
-  std::cout << "Rom size in bytes: " << std::dec << header.size() << std::endl;
+  std::cout << "Rom size in bytes: " << std::dec << rom.size() << std::endl;
   std::cout << "Number of 16384 byte program ROM pages: " << static_cast<uint16_t>(prgPages) << std::endl;
   std::cout << "Number of 8192 byte character ROM pages: " << static_cast<uint16_t>(chrPages) << std::endl;
   std::cout << "Mapper number: " << mapperNumber << std::endl;
